@@ -1,12 +1,18 @@
 import React, { useState } from "react";
 import { Text, View, Image, TouchableHighlight } from "react-native";
-import { Float } from "react-native/Libraries/Types/CodegenTypes";
 import { keysStyles } from "../assets/styles/keys.style";
 
 export function CalculadoraKeys() {
   const [digitos, onChangeDigitos] = useState([""]);
   const [expressao, onChangeExpressao] = useState("");
-  const [result, onChangeResult] = useState(0);
+  const [result, onChangeResult] = useState('');
+  const [floated, onChangeFloat] = useState(false)
+
+
+  // const textHeader = () => {
+  //   const txtH = document.getElem
+
+  // }
 
   const digito = (valor: number) => {
     if (!expressao) {
@@ -24,22 +30,23 @@ export function CalculadoraKeys() {
   };
 
   const expression = (exp: string) => {
-    if (!expressao) {
-      const novaExpression = exp;
-      onChangeExpressao(novaExpression);
-      console.log(novaExpression);
+    if (digitos[0] == '') {
+      return
     }
-
+    if (!expressao) {
+      onChangeExpressao(exp);
+      onChangeFloat(false)
+    }
     console.log(digitos);
   };
 
   const limpar = () => {
     onChangeDigitos([""]);
     onChangeExpressao("");
+    onChangeFloat(false)
   };
 
   const apagar = () => {
-    // let lastConj = digitos[digitos.length - 1];
     if (!expressao) {
       digitos[0] = digitos[0].substring(0, digitos[0].length - 1);
     } else {
@@ -54,13 +61,44 @@ export function CalculadoraKeys() {
       digitos[0] = "";
     } else {
       digitos[1] = "";
-    }
-
+    }    
     onChangeDigitos(digitos);
+    onChangeFloat(false)
   };
 
+  const addFloatPoint = (dot: string) => {
+    if (floated == true) {
+      return
+    }
+    else {
+      onChangeFloat(true)
+      if (!expressao) {
+
+        digitos[0] = digitos[0].concat(String(dot));
+      
+      } else {
+        digitos[1] = digitos[1].concat(String(dot));
+      }
+      onChangeDigitos(digitos)
+      return
+    }
+  }
+
+  const moreOrLess = () => {
+    if (!expressao) {
+      const novoValor = String(Number(digitos[0]) * -1);
+      onChangeDigitos([novoValor]);
+      console.log('novoValor', novoValor);
+    }
+    else {
+      digitos[1] = String(Number(digitos[1]) * -1);
+      onChangeDigitos(digitos);
+      console.log('digitos', digitos);
+    }
+  }
+
   const calcular = () => {
-    let resultado = 0;
+    let resultado: any;
     switch (expressao) {
       case "/":
         resultado = Number(digitos[0]) / Number(digitos[1]);
@@ -77,9 +115,10 @@ export function CalculadoraKeys() {
     }
     limpar();
     onChangeResult(resultado);
-    console.log(result);
+    console.log(resultado);
   };
 
+  
   return (
     <View>
       <View style={keysStyles.rowKeys}>
@@ -189,8 +228,9 @@ export function CalculadoraKeys() {
         </TouchableHighlight>
       </View>
       <View style={keysStyles.rowKeys}>
-        <TouchableHighlight style={keysStyles.columnKey}>
-          <Text style={keysStyles.keyText}>+</Text>
+        <TouchableHighlight style={keysStyles.columnKey}
+        onPress={() => moreOrLess()}>
+          <Text style={keysStyles.keyText}>+/-</Text>
         </TouchableHighlight>
         <TouchableHighlight
           style={keysStyles.columnKey}
@@ -198,7 +238,10 @@ export function CalculadoraKeys() {
         >
           <Text style={keysStyles.keyText}>0</Text>
         </TouchableHighlight>
-        <TouchableHighlight style={keysStyles.columnKey}>
+        <TouchableHighlight 
+          style={keysStyles.columnKey}
+          onPress={() => addFloatPoint('.')}
+        >
           <Text style={keysStyles.keyText}>,</Text>
         </TouchableHighlight>
         <TouchableHighlight
